@@ -97,7 +97,7 @@ def build_report(results, out_dir="."):
         lines.append("  none")
     for _, r in anom.head(20).iterrows():
         lines.append(f"  {r['date']:%m/%d %H:%M}  {r['item']:<22} "
-                     f"${r['line_total']:>10,.2f}  (z={r['z']:+.1f})")
+                     f"${r['line_total']:>10,.2f}  ({r['x_normal']:.0f}x normal)")
     lines += ["", "Charts saved as PNG next to this PDF."]
 
     pdf = out_dir / f"report_{datetime.now():%Y-%m-%d}.pdf"

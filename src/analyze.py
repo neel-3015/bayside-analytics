@@ -43,14 +43,17 @@ def summarize(df):
     }
 
 
-def find_anomalies(df, z_thresh=3.5):
-    """Flag lines whose line_total z-score within their item is extreme
-    (catches price-keying errors like $1,333 on a $13 wine)."""
-    stats = df.groupby("item")["line_total"].agg(["mean", "std"])
-    joined = df.join(stats, on="item", rsuffix="_item")
-    z = (joined["line_total"] - joined["mean"]) / joined["std"].replace(0, pd.NA)
-    flags = joined[z.abs() > z_thresh]
-    cols = ["date", "item", "category", "qty", "unit_price", "line_total"]
-    out = flags[cols].copy()
-    out["z"] = z[abs(z) > z_thresh]
+def find_anomalies(df, ratio=10.0):
+    """Flag lines whose unit price is > ratio x the item's median price.
+    A keying error is always an OVER-key ($1,999 typed for $13.33), and
+    with real sales volumes (dozens+ per item) the median is unaffected
+    by the handful of errors in the data. Requires >=3 sales so a
+    2-row item can't set its own baseline."""
+    stats = df.groupby("item")["unit_price"].agg(["median", "count"])
+    med = df["item"].map(stats["median"])
+    cnt = df["item"].map(stats["count"])
+    mask = (df["unit_price"] > ratio * med) & (cnt >= 3)
+    out = df.loc[mask, ["date", "item", "category", "qty",
+                        "unit_price", "line_total"]].copy()
+    out["x_normal"] = (df["unit_price"] / med)[mask].round(1)
     return out.sort_values("date")
