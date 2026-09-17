@@ -1,0 +1,14 @@
+# Never commit real store data or secrets
+data/incoming/*.csv
+data/uploads/
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Generated output (keep the folder, ignore contents)
+reports/*
+!reports/.gitkeep
