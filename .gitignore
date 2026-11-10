@@ -12,3 +12,4 @@ __pycache__/
 # Generated output (keep the folder, ignore contents)
 reports/*
 !reports/.gitkeep
+.DS_Store
